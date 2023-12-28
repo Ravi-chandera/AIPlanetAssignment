@@ -61,16 +61,24 @@ def final_result(query, llm, prompt):
 #chainlit code
 @cl.on_chat_start
 async def start():
+
   llm, prompt = qa_bot()
   
+  # Set llm and prompt in user session
+  bot_data = {"llm": llm, "prompt": prompt}
+  cl.user_session.set("bot", bot_data)
+
   msg = cl.Message(content="Starting...")
-  await msg.send()  
+  await msg.send()
 
 @cl.on_message
 async def main(message: cl.Message):
 
-  llm, prompt = cl.user_session.get("bot")
+  # Get llm and prompt from user session
+  bot_data = cl.user_session.get("bot")
+  llm = bot_data["llm"]
+  prompt = bot_data["prompt"]
   
-  answer = final_result(message.content, llm, prompt)
-  
+  answer = final_result(message.content, llm, prompt)  
+
   await cl.Message(content=answer).send()
